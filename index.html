@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TORNEO 21 | Bariloche</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+  --cream:#F2E9D8;
+  --paper:#E8DDC9;
+  --burgundy:#742F35;
+  --brown:#473B34;
+  --orange:#D88A45;
+  --ink:#282522;
+  --muted:#82796D;
+  --line:#D3C5B0;
+  --white:#FFF9EF;
+}
+* {box-sizing:border-box;margin:0;padding:0}
+body {background:var(--cream);color:var(--ink);font-family:"DM Sans",sans-serif}
+button,input,select,textarea {font:inherit}
+button {cursor:pointer}
+header {
+  min-height:76px;padding:0 7%;display:flex;align-items:center;
+  justify-content:space-between;background:var(--cream);
+  border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10
+}
+.logo {font-family:Anton,sans-serif;font-size:30px;color:var(--burgundy);letter-spacing:1px}
+.logo span {color:var(--orange)}
+nav {display:flex;gap:20px}
+nav button {
+  background:none;border:0;color:var(--brown);font-size:11px;
+  font-weight:800;letter-spacing:1px;text-transform:uppercase
+}
+nav button:hover,nav button.active {color:var(--burgundy)}
+.menu {display:none;background:none;border:0;color:var(--burgundy);font-size:25px}
+.page {display:none}
+.page.active {display:block}
+.hero {
+  min-height:570px;padding:85px 9%;display:flex;align-items:center;
+  position:relative;overflow:hidden;
+  background:linear-gradient(90deg,rgba(40,25,22,.88),rgba(40,25,22,.22)),
+  url("https://images.unsplash.com/photo-1519861531473-9200262188bf?w=1800") center 48%/cover;
+  color:var(--white)
+}
+.hero:after {
+  content:"21";position:absolute;right:7%;top:20px;
+  font-family:Anton,sans-serif;font-size:390px;
+  color:rgba(242,233,216,.16);line-height:1
+}
+.hero-content {position:relative;z-index:1;max-width:720px}
+.eyebrow {font-size:11px;font-weight:800;letter-spacing:4px;color:var(--orange);margin-bottom:18px}
+.hero h1 {font-family:Anton,sans-serif;font-size:clamp(65px,10vw,115px);line-height:.95;letter-spacing:1px}
+.hero h1 span {color:#E7A15D}
+.hero p {color:var(--cream);margin-top:25px;font-size:14px;line-height:1.8}
+.tag {display:inline-block;margin-top:28px;padding:14px 22px;background:var(--orange);color:var(--ink);font-size:10px;font-weight:900;letter-spacing:1.5px}
+.section {padding:65px 8%}
+.dark-section {background:var(--burgundy);color:var(--cream)}
+.section-heading {display:flex;justify-content:space-between;align-items:end;margin-bottom:30px;gap:20px}
+h2,h3 {font-family:Anton,sans-serif;font-weight:400;text-transform:uppercase}
+.section-heading h2 {font-size:43px}
+.orange {color:var(--orange)}
+.cards {display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stat {padding:23px;background:var(--white);border:1px solid var(--line);box-shadow:4px 4px 0 var(--line)}
+.stat .big-number {font-family:Anton,sans-serif;font-size:53px;color:var(--burgundy)}
+.stat p {font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted)}
+.panel {background:var(--white);border:1px solid var(--line);padding:25px;margin-bottom:18px;box-shadow:3px 3px 0 var(--line)}
+.panel h3 {font-size:25px;margin-bottom:18px;color:var(--burgundy)}
+.group-grid {display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.group-title {display:flex;justify-content:space-between;border-bottom:3px solid var(--burgundy);padding-bottom:12px;margin-bottom:15px}
+.group-title h3 {font-size:27px}
+table {width:100%;border-collapse:collapse;min-width:440px}
+.table-wrap {overflow-x:auto}
+th {text-align:left;color:var(--muted);font-size:9px;padding:12px 7px;border-bottom:1px solid var(--line)}
+td {padding:14px 7px;font-size:11px;border-bottom:1px solid #E9DFD0}
+td:first-child {color:var(--burgundy);font-weight:900}
+.muted {color:var(--muted)}
+.match {display:grid;grid-template-columns:75px minmax(0,1fr);align-items:center;padding:16px 5px;border-bottom:1px solid var(--line);gap:12px}
+.match-info {color:var(--muted);font-size:9px;font-weight:700}
+.match-players {font-size:12px;font-weight:800;text-align:left;min-width:0;flex:1}
+.match-content {display:flex;flex-direction:column;gap:9px;min-width:0}
+.match-team-row {display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.match-team-row .club-inline {min-width:0}
+.match-team-row .club-inline span {min-width:0}
+.match-score {color:var(--burgundy);font-family:"Barlow Condensed";font-size:25px;font-weight:700;line-height:1;white-space:nowrap;min-width:25px;text-align:right}
+.bracket {display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.bracket-card {background:var(--white);border-left:5px solid var(--burgundy);padding:22px}
+.bracket-card h3 {font-size:24px;color:var(--burgundy)}
+.placeholder {padding:13px;margin-top:9px;background:var(--paper);color:var(--muted);font-size:11px;font-weight:700}
+.rule {padding:17px 0;border-bottom:1px solid var(--line)}
+.rule strong {color:var(--burgundy)}
+.rule p {color:var(--brown);font-size:12px;line-height:1.8;margin-top:7px}
+footer {padding:35px 8%;background:var(--brown);color:var(--cream);display:flex;justify-content:space-between;font-size:10px;letter-spacing:1px}
+footer strong {color:var(--orange)}
+.admin-wrap {max-width:900px;margin:auto}
+.form-grid {display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field {display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.field label {font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted)}
+.field input,.field select,.field textarea {
+  width:100%;padding:12px;background:var(--cream);
+  border:1px solid var(--line);color:var(--ink);outline:none
+}
+.field textarea {min-height:90px;resize:vertical}
+.action {
+  padding:12px 17px;background:var(--burgundy);color:white;
+  border:0;font-size:10px;font-weight:800;letter-spacing:1px;
+  text-transform:uppercase;margin:5px 5px 5px 0
+}
+.action:hover {background:var(--brown)}
+.action.secondary {background:var(--orange);color:var(--ink)}
+.action.danger {background:#9B3434}
+.action:disabled {opacity:.45;cursor:not-allowed}
+.notice {padding:13px;background:var(--paper);font-size:12px;line-height:1.6;margin:12px 0}
+.status {display:inline-block;padding:6px 10px;background:var(--paper);font-size:10px;font-weight:800;margin:5px 0 15px}
+.status.ok {background:#DCE8D5;color:#315C37}
+.status.error {background:#F2D8D3;color:#8A3029}
+.hidden {display:none!important}
+.admin-match {border-bottom:1px solid var(--line);padding:15px 0}
+.admin-match strong {display:block;margin-bottom:8px;font-size:12px}
+.admin-match input {width:65px;padding:9px;background:var(--cream);border:1px solid var(--line);margin:4px}
+.admin-match button {padding:9px 12px}
+.empty {padding:18px;color:var(--muted);font-size:12px;text-align:center}
+.announcement {border-left:4px solid var(--orange);padding:15px;background:var(--white);margin:12px 0}
+.announcement h3 {color:var(--burgundy);font-size:19px}
+.announcement p {font-size:12px;line-height:1.7;margin-top:7px}
+.connection {font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted)}
+.club-mark {width:34px;height:34px;object-fit:contain;background:var(--paper);border:1px solid var(--line);padding:3px;vertical-align:middle;flex-shrink:0}
+.club-inline {display:inline-flex;align-items:center;gap:8px;text-align:left}
+.club-inline img {width:30px;height:30px;object-fit:contain;background:var(--paper);border:1px solid var(--line);padding:2px}
+.club-inline small {display:block;color:var(--muted);font-size:9px;font-weight:600}
+.registration-preview {display:flex;align-items:center;gap:14px;padding:14px;background:var(--paper);margin:12px 0}
+.registration-preview img {width:72px;height:72px;object-fit:contain;background:var(--white);border:1px solid var(--line);padding:5px}
+.registration-item {border-bottom:1px solid var(--line);padding:15px 0}
+.registration-item .preview {display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.registration-item .preview img {width:58px;height:58px;object-fit:contain;background:var(--paper);padding:4px}
+@media(max-width:800px) {
+  header {padding:0 5%}
+  nav {display:none;position:absolute;top:76px;left:0;right:0;padding:22px;background:var(--cream);flex-direction:column;gap:20px}
+  nav.open {display:flex}
+  .menu {display:block}
+  .hero {min-height:470px;padding:60px 7%}
+  .hero:after {font-size:240px;right:-5%;top:130px}
+  .section {padding:45px 6%}
+  .cards {grid-template-columns:1fr 1fr}
+  .group-grid,.bracket {grid-template-columns:1fr}
+  .section-heading {align-items:start;flex-direction:column}
+  footer {flex-direction:column;gap:12px}
+  .form-grid {grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="logo">TORNEO<span>21</span></div>
+  <nav id="nav">
+    <button class="active" onclick="showPage('inicio',this)">Inicio</button>
+    <button onclick="showPage('fixture',this)">Fixture</button>
+    <button onclick="showPage('posiciones',this)">Posiciones</button>
+    <button onclick="showPage('playoffs',this)">Playoffs</button>
+    <button onclick="showPage('estadisticas',this)">Estadísticas</button>
+    <button onclick="showPage('reglamento',this)">Reglamento</button>
+    <button onclick="showPage('inscripcion',this)">Inscripción</button>
+    <button onclick="showPage('administracion',this)">Administración</button>
+  </nav>
+  <button class="menu" onclick="toggleMenu()">☰</button>
+</header>
+
+<main>
+<section id="inicio" class="page active">
+  <div class="hero">
+    <div class="hero-content">
+      <div class="eyebrow">VERANO 2026 / 2027 · PRIMERA EDICIÓN</div>
+      <h1>LA CANCHA.<br>EL UNO CONTRA<br><span>UNO.</span></h1>
+      <p>Ocho jugadores. Dos grupos. Un solo campeón.<br>La competencia se define en 21 puntos.</p>
+      <div class="tag" id="heroTag">INSCRIPCIONES PRÓXIMAMENTE</div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-heading">
+      <div><div class="eyebrow">LA COMPETENCIA</div><h2>EL CAMINO AL <span class="orange">21</span></h2></div>
+      <p class="muted">FORMATO DEL TORNEO</p>
+    </div>
+    <div class="cards">
+      <div class="stat"><div class="big-number">08</div><p>JUGADORES</p></div>
+      <div class="stat"><div class="big-number">02</div><p>GRUPOS</p></div>
+      <div class="stat"><div class="big-number">04</div><p>CLASIFICADOS</p></div>
+      <div class="stat"><div class="big-number">21</div><p>PUNTOS PARA GANAR</p></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-heading"><div><div class="eyebrow">ÚLTIMAS NOVEDADES</div><h2>ACTUALIDAD</h2></div></div>
+    <div id="homeAnnouncements"><p class="empty">Próximamente, novedades del torneo.</p></div>
+  </div>
+  <div class="section dark-section">
+    <div class="section-heading"><div><div class="eyebrow">PRÓXIMAMENTE</div><h2>LA COMPETENCIA EMPIEZA ACÁ</h2></div></div>
+    <p>Ocho jugadores. Dos grupos. Un solo campeón. Seguí el torneo desde esta página.</p>
+  </div>
+</section>
+
+<section id="fixture" class="page">
+  <div class="section">
+    <div class="eyebrow">CALENDARIO OFICIAL</div>
+    <h2 style="font-size:55px;margin-bottom:10px">FIXTURE</h2>
+    <p class="muted" style="margin-bottom:30px">Fase de grupos · Todos contra todos</p>
+    <div class="group-grid">
+      <div class="panel"><div class="group-title"><h3>GRUPO A</h3><span class="orange">06 PARTIDOS</span></div><div id="fixtureA"></div></div>
+      <div class="panel"><div class="group-title"><h3>GRUPO B</h3><span class="orange">06 PARTIDOS</span></div><div id="fixtureB"></div></div>
+    </div>
+    <p class="muted">Fechas y horarios: por definir.</p>
+  </div>
+</section>
+
+<section id="posiciones" class="page">
+  <div class="section">
+    <div class="eyebrow">FASE DE GRUPOS</div>
+    <h2 style="font-size:55px;margin-bottom:30px">POSICIONES</h2>
+    <div class="group-grid">
+      <div class="panel"><div class="group-title"><h3>GRUPO A</h3></div><div id="tableA"></div></div>
+      <div class="panel"><div class="group-title"><h3>GRUPO B</h3></div><div id="tableB"></div></div>
+    </div>
+    <p class="muted">Victoria: 3 puntos · Derrota: 0 puntos · Desempate: diferencia de puntos.</p>
+  </div>
+</section>
+
+<section id="playoffs" class="page">
+  <div class="section">
+    <div class="eyebrow">ELIMINACIÓN DIRECTA</div>
+    <h2 style="font-size:55px;margin-bottom:30px">PLAYOFFS</h2>
+    <div id="playoffContent" class="bracket"></div>
+    <div class="panel" style="margin-top:20px;text-align:center">
+      <div class="eyebrow">EL PARTIDO DEFINITIVO</div>
+      <h2 style="font-size:40px">GRAN FINAL</h2>
+      <div id="finalContent"></div>
+    </div>
+  </div>
+</section>
+
+<section id="estadisticas" class="page">
+  <div class="section">
+    <div class="eyebrow">NÚMEROS DEL TORNEO</div>
+    <h2 style="font-size:55px;margin-bottom:30px">ESTADÍSTICAS</h2>
+    <div class="cards">
+      <div class="stat"><div class="big-number" id="statMatches">0</div><p>PARTIDOS JUGADOS</p></div>
+      <div class="stat"><div class="big-number" id="statWins">0</div><p>VICTORIAS REGISTRADAS</p></div>
+      <div class="stat"><div class="big-number" id="statPoints">0</div><p>PUNTOS ANOTADOS</p></div>
+      <div class="stat"><div class="big-number" id="statRecord">—</div><p>RÉCORD DE PUNTOS</p></div>
+    </div>
+    <div class="panel" style="margin-top:20px">
+      <h3>RANKING INDIVIDUAL</h3>
+      <div id="individualRanking"></div>
+    </div>
+  </div>
+</section>
+
+<section id="reglamento" class="page">
+  <div class="section">
+    <div class="eyebrow">REGLAS OFICIALES</div>
+    <h2 style="font-size:55px;margin-bottom:10px">REGLAMENTO</h2>
+    <p class="muted" style="margin-bottom:30px">Modalidad individual · Uno contra uno</p>
+    <div class="panel">
+      <h3>01. FORMATO</h3>
+      <div class="rule"><p>Ocho jugadores divididos en dos grupos de cuatro. Todos juegan contra todos dentro de su grupo. Cada jugador disputa tres partidos.</p></div>
+      <div class="rule"><p>Clasifican los dos mejores de cada grupo. Semifinales: primero A contra segundo B y primero B contra segundo A. Los ganadores disputan la final.</p></div>
+      <div class="rule"><p>La victoria otorga 3 puntos y la derrota 0. El desempate definido es la diferencia de puntos.</p></div>
+    </div>
+    <div class="panel">
+      <h3>02. PUNTUACIÓN</h3>
+      <div class="rule"><p>Cada jugador comienza en 0. El primer tiro desde el punto fijo vale 1 punto.</p></div>
+      <div class="rule"><p>Si convierte, retrocede 1,5 metros. El siguiente tiro vale 2 puntos. Los tiros consecutivos posteriores también valen 2 puntos desde esa posición.</p></div>
+      <div class="rule"><p>Hay que llegar exactamente a 21 puntos. Si un tiro supera los 21, la puntuación baja a 15 y pierde la posesión.</p></div>
+    </div>
+    <div class="panel">
+      <h3>03. REBOTES</h3>
+      <div class="rule"><p>Si el tiro toca el aro y falla, el rival puede capturar el rebote después del primer pique y antes del segundo.</p></div>
+      <div class="rule"><p>Debe agarrar y controlar la pelota limpiamente, manteniendo al menos un pie apoyado en el lugar de captura. No alcanza con tocarla o desviarla.</p></div>
+      <div class="rule"><p>El tiro de rebote se realiza desde el lugar exacto de captura y vale siempre 1 punto.</p></div>
+      <div class="rule"><p>Si convierte, vuelve al punto fijo: su siguiente tiro vale 2 puntos y los consecutivos también. Si falla, el rival original toma la posesión y comienza desde el punto fijo por 1 punto.</p></div>
+      <div class="rule"><p>Si la pelota pica dos veces sin captura válida, conserva la posesión quien lanzó originalmente y vuelve al punto fijo para tirar por 1 punto.</p></div>
+      <div class="rule"><p>Si el rival toca la pelota antes del primer pique, pierde 1 punto y la oportunidad de capturar. Quien lanzó conserva la posesión y reinicia desde el punto fijo por 1 punto.</p></div>
+      <div class="rule"><p>Si el tiro toca el aro y sale de la cancha, quien lanzó conserva la posesión y vuelve al punto fijo sin penalización.</p></div>
+    </div>
+    <div class="panel">
+      <h3>04. AIRBALL</h3>
+      <div class="rule"><p>Un tiro que no toca el aro resta 2 puntos y provoca pérdida automática de posesión. El rival comienza desde el punto fijo con un tiro de 1 punto.</p></div>
+      <div class="rule"><p>También se aplica a los tiros de rebote. Nunca se puede bajar de 0 puntos.</p></div>
+    </div>
+    <div class="panel">
+      <h3>05. PUNTO GLORIA TOTAL</h3>
+      <div class="rule"><p>Cada jugador puede utilizarlo una sola vez por partido. Se habilita cuando el rival tiene al menos 15 puntos y la diferencia es de 10 o más.</p></div>
+      <div class="rule"><p>El jugador que pierde realiza un tiro de espaldas desde la línea de dobles. Si convierte, gana automáticamente el partido.</p></div>
+      <div class="rule"><p>Si falla, pierde 5 puntos y la posesión. El rival reinicia desde el punto fijo con un tiro de 1 punto.</p></div>
+      <div class="rule"><p>La organización anuncia cuándo se habilita esta posibilidad.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="inscripcion" class="page">
+  <div class="section"><div class="admin-wrap">
+    <div class="eyebrow">FORMÁ PARTE DE LA COMPETENCIA</div>
+    <h2 style="font-size:55px;margin-bottom:10px">INSCRIPCIÓN</h2>
+    <p class="muted" style="font-size:12px;line-height:1.8;margin-bottom:25px">Cada participante representa a su propio club. Presentá tu nombre, el nombre del club y su escudo oficial. La inscripción queda pendiente hasta que la organización la apruebe.</p>
+    <div class="panel">
+      <h3>INSCRIBÍ TU CLUB</h3>
+      <div class="field"><label>NOMBRE DEL JUGADOR</label><input id="registrationPlayer" maxlength="80" placeholder="Nombre y apellido"></div>
+      <div class="field"><label>NOMBRE DEL CLUB</label><input id="registrationClub" maxlength="80" placeholder="Ej. Club Atlético ..."></div>
+      <div class="field"><label>ESCUDO DEL CLUB · PNG, JPG O WEBP · MÁXIMO 2 MB</label><input id="registrationCrest" type="file" accept="image/png,image/jpeg,image/webp"></div>
+      <div id="crestPreview" class="registration-preview hidden"><img id="crestPreviewImage" alt="Vista previa del escudo"><div><strong id="crestPreviewName"></strong><p class="muted" style="font-size:10px">Vista previa del escudo seleccionado</p></div></div>
+      <button class="action" id="registrationSubmit" onclick="submitRegistration()">ENVIAR INSCRIPCIÓN</button>
+      <p id="registrationMessage" class="notice hidden" role="status"></p>
+    </div>
+    <div class="notice">La organización revisará tu solicitud y asignará el grupo. El envío del formulario no garantiza una plaza hasta que la inscripción sea aprobada.</div>
+  </div></div>
+</section>
+
+<section id="administracion" class="page">
+  <div class="section">
+    <div class="admin-wrap">
+      <div class="eyebrow">PANEL PRIVADO</div>
+      <h2 style="font-size:55px;margin-bottom:15px">ADMINISTRACIÓN</h2>
+      <div id="connectionStatus" class="status">Conectando con Supabase...</div>
+
+      <div id="loginPanel" class="panel">
+        <h3>ACCESO DE ORGANIZACIÓN</h3>
+        <p class="muted" style="font-size:12px;margin-bottom:18px">Ingresá con la cuenta administradora.</p>
+        <div class="field"><label>EMAIL</label><input id="loginEmail" type="email" autocomplete="username"></div>
+        <div class="field"><label>CONTRASEÑA</label><input id="loginPassword" type="password" autocomplete="current-password"></div>
+        <button class="action" onclick="login()">INICIAR SESIÓN</button>
+        <p id="loginMessage" class="notice hidden"></p>
+      </div>
+
+      <div id="adminPanel" class="hidden">
+        <div class="panel">
+          <h3>SESIÓN ADMINISTRATIVA</h3>
+          <p id="adminEmail" class="muted" style="font-size:12px"></p>
+          <button class="action danger" onclick="logout()">CERRAR SESIÓN</button>
+        </div>
+
+        <div class="panel">
+          <h3>INSCRIPCIONES PENDIENTES</h3>
+          <p class="muted" style="font-size:12px;line-height:1.7;margin-bottom:12px">Revisá el nombre, el club y el escudo. Al aprobar, elegí el grupo del participante.</p>
+          <div id="adminRegistrations"><p class="empty">Cargando solicitudes...</p></div>
+        </div>
+        <div class="panel">
+          <h3>JUGADORES</h3>
+          <div class="form-grid">
+            <div class="field"><label>NOMBRE DEL JUGADOR</label><input id="playerName" placeholder="Nombre y apellido"></div>
+            <div class="field"><label>GRUPO</label><select id="playerGroup"><option value="A">Grupo A</option><option value="B">Grupo B</option></select></div>
+          </div>
+          <button class="action" onclick="addPlayer()">AGREGAR JUGADOR</button>
+          <div id="adminPlayers"></div>
+        </div>
+
+        <div class="panel">
+          <h3>GENERAR FIXTURE</h3>
+          <p class="muted" style="font-size:12px;line-height:1.7">Genera automáticamente los seis cruces de cada grupo. Solo se puede generar si hay cuatro jugadores activos en cada grupo y no existen partidos de grupo cargados.</p>
+          <button class="action secondary" onclick="generateFixture()">GENERAR FIXTURE DE GRUPOS</button>
+        </div>
+
+        <div class="panel">
+          <h3>CARGAR RESULTADOS</h3>
+          <div id="adminMatches"></div>
+        </div>
+
+        <div class="panel">
+          <h3>GENERAR PLAYOFFS</h3>
+          <p class="muted" style="font-size:12px;line-height:1.7">Cuando todos los partidos de grupos estén jugados, se generan las semifinales según las posiciones.</p>
+          <button class="action secondary" onclick="generatePlayoffs()">GENERAR SEMIFINALES</button>
+          <button class="action" onclick="generateFinal()">GENERAR FINAL</button>
+        </div>
+
+        <div class="panel">
+          <h3>ANUNCIOS</h3>
+          <div class="field"><label>TÍTULO</label><input id="announcementTitle" placeholder="Título del anuncio"></div>
+          <div class="field"><label>CONTENIDO</label><textarea id="announcementContent" placeholder="Escribí la novedad..."></textarea></div>
+          <button class="action" onclick="addAnnouncement()">PUBLICAR ANUNCIO</button>
+          <div id="adminAnnouncements"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div><strong>TORNEO 21</strong> · VERANO 2026/27</div>
+</footer>
+
+<script>
+/* =====================================================
+   CONFIGURACIÓN SUPABASE
+   ===================================================== */
+
+const SUPABASE_URL = "https://sxmkxeuzdldfpulyoehm.supabase.co";
+
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4bWt4ZXV6ZGxkZnB1bHlvZWhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQxNDE5NjYsImV4cCI6MjEwOTcxNzk2Nn0.IHaJjb5H16G3Wr1FHhulcRl25gLwwz9SfO3CiErREk8";
+
+const ADMIN_UID = "6ff408a6-e29f-4b4f-8d3e-d9978a93938f";
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let players = [];
+let matches = [];
+let announcements = [];
+let currentUser = null;
+let loading = false;
+
+/* =====================================================
+   NAVEGACIÓN
+   ===================================================== */
+
+function showPage(id,button) {
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+  if(button) button.classList.add("active");
+  document.getElementById("nav").classList.remove("open");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function toggleMenu() {
+  document.getElementById("nav").classList.toggle("open");
+}
+
+/* =====================================================
+   MENSAJES Y CONEXIÓN
+   ===================================================== */
+
+function setStatus(message,type="") {
+  const el=document.getElementById("connectionStatus");
+  el.textContent=message;
+  el.className="status "+type;
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g,char=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  })[char]);
+}
+
+function playerName(id) {
+  const p=players.find(x=>x.id===id);
+  return p ? p.name : "Jugador pendiente";
+}
+function playerClub(id) {
+  const p=players.find(x=>x.id===id);
+  return p ? (p.club_name || p.name) : "Club pendiente";
+}
+function playerDisplay(id) {
+  const p=players.find(x=>x.id===id);
+  if(!p) return "Jugador pendiente";
+  const crest=p.crest_url
+    ? `<img src="${escapeHTML(p.crest_url)}" alt="Escudo de ${escapeHTML(p.club_name || p.name)}">`
+    : `<span class="club-mark"></span>`;
+  return `<span class="club-inline">${crest}<span><strong>${escapeHTML(p.club_name || p.name)}</strong><small>${escapeHTML(p.name)}</small></span></span>`;
+}
+
+function isAdmin() {
+  return currentUser && currentUser.id===ADMIN_UID;
+}
+
+function notifyError(error) {
+  console.error(error);
+  alert(error?.message || "Ocurrió un error inesperado.");
+}
+
+/* =====================================================
+   CARGA DE DATOS
+   ===================================================== */
+
+async function loadData() {
+  if(loading) return;
+  loading=true;
+
+  try {
+    const [p,m,a]=await Promise.all([
+      db.from("players").select("*").eq("active",true).order("created_at"),
+      db.from("matches").select("*").order("match_number"),
+      db.from("announcements").select("*").eq("published",true).order("created_at",{ascending:false})
+    ]);
+
+    if(p.error) throw p.error;
+    if(m.error) throw m.error;
+    if(a.error) throw a.error;
+
+    players=p.data || [];
+    matches=m.data || [];
+    announcements=a.data || [];
+
+    renderAll();
+    setStatus("SUPABASE CONECTADO","ok");
+  } catch(error) {
+    setStatus("ERROR DE CONEXIÓN","error");
+    console.error("Error al cargar datos:",error);
+  } finally {
+    loading=false;
+  }
+}
+
+/* =====================================================
+   TABLAS Y FIXTURE
+   ===================================================== */
+
+function groupPlayers(group) {
+  return players.filter(p=>p.group_name===group);
+}
+
+function groupMatches(group) {
+  return matches.filter(m=>m.stage==="group" && m.group_name===group);
+}
+
+function renderFixture(id,group) {
+  const target=document.getElementById(id);
+  const games=groupMatches(group);
+
+  if(!games.length) {
+    target.innerHTML='<p class="empty">El fixture todavía no fue generado.</p>';
+    return;
+  }
+
+  target.innerHTML=games.map(m=>`
+    <div class="match">
+      <div class="match-info">PARTIDO ${m.match_number}</div>
+      <div class="match-content">
+        <div class="match-team-row">
+          <div class="match-players">${playerDisplay(m.player1_id)}</div>
+          <div class="match-score">${m.status==="played" ? m.score1 : "—"}</div>
+        </div>
+        <div class="match-team-row">
+          <div class="match-players">${playerDisplay(m.player2_id)}</div>
+          <div class="match-score">${m.status==="played" ? m.score2 : "—"}</div>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+/* =====================================================
+   POSICIONES
+   ===================================================== */
+
+function calculateStandings(group) {
+  const list=groupPlayers(group).map(p=>({
+    ...p,played:0,wins:0,losses:0,pointsFor:0,pointsAgainst:0,difference:0,tournamentPoints:0
+  }));
+
+  const byId=Object.fromEntries(list.map(p=>[p.id,p]));
+
+  groupMatches(group).filter(m=>m.status==="played").forEach(m=>{
+    const p1=byId[m.player1_id];
+    const p2=byId[m.player2_id];
+    if(!p1 || !p2) return;
+
+    const s1=Number(m.score1);
+    const s2=Number(m.score2);
+
+    p1.played++;
+    p2.played++;
+    p1.pointsFor+=s1;
+    p1.pointsAgainst+=s2;
+    p2.pointsFor+=s2;
+    p2.pointsAgainst+=s1;
+
+    if(s1>s2) {
+      p1.wins++;
+      p2.losses++;
+      p1.tournamentPoints+=3;
+    } else if(s2>s1) {
+      p2.wins++;
+      p1.losses++;
+      p2.tournamentPoints+=3;
+    }
+  });
+
+  list.forEach(p=>p.difference=p.pointsFor-p.pointsAgainst);
+
+  return list.sort((a,b)=>
+    b.tournamentPoints-a.tournamentPoints ||
+    b.difference-a.difference
+  );
+}
+
+function renderTable(id,group) {
+  const list=calculateStandings(group);
+  const target=document.getElementById(id);
+
+  if(!list.length) {
+    target.innerHTML='<p class="empty">Todavía no hay jugadores registrados.</p>';
+    return;
+  }
+
+  target.innerHTML=`
+    <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>#</th><th>CLUB / JUGADOR</th><th>PJ</th><th>PG</th><th>PP</th><th>DIF</th><th>PTS</th>
+      </tr></thead>
+      <tbody>
+        ${list.map((p,i)=>`
+          <tr>
+            <td>${i+1}</td>
+            <td>${playerDisplay(p.id)}</td>
+            <td>${p.played}</td>
+            <td>${p.wins}</td>
+            <td>${p.losses}</td>
+            <td>${p.difference>0?"+":""}${p.difference}</td>
+            <td><strong>${p.tournamentPoints}</strong></td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+    </div>`;
+}
+
+/* =====================================================
+   PLAYOFFS
+   ===================================================== */
+
+function getMatch(stage) {
+  return matches.find(m=>m.stage===stage);
+}
+
+function renderPlayoffs() {
+  const semi1=matches.find(m=>m.stage==="semifinal" && m.match_number===1);
+  const semi2=matches.find(m=>m.stage==="semifinal" && m.match_number===2);
+  const final=getMatch("final");
+
+  function card(title,m) {
+    if(!m) return `<div class="bracket-card"><h3>${title}</h3><div class="placeholder">Pendiente de clasificación</div></div>`;
+    return `
+      <div class="bracket-card">
+        <h3>${title}</h3>
+        <div class="placeholder">${escapeHTML(playerName(m.player1_id))}</div>
+        <div class="placeholder">${escapeHTML(playerName(m.player2_id))}</div>
+        <p style="margin-top:12px;font-weight:800;color:var(--burgundy)">
+          ${m.status==="played" ? `${m.score1} : ${m.score2}` : "Pendiente"}
+        </p>
+      </div>`;
+  }
+
+  document.getElementById("playoffContent").innerHTML=
+    card("SEMIFINAL 1",semi1)+card("SEMIFINAL 2",semi2);
+
+  document.getElementById("finalContent").innerHTML=final
+    ? `<div class="placeholder">${playerDisplay(final.player1_id)}</div>
+       <div class="placeholder">${playerDisplay(final.player2_id)}</div>
+       <h3 style="margin-top:15px">${final.status==="played" ? `${final.score1} : ${final.score2}` : "FINAL PENDIENTE"}</h3>`
+    : '<div class="placeholder">GANADOR SEMIFINAL 1</div><div class="placeholder">GANADOR SEMIFINAL 2</div>';
+}
+
+/* =====================================================
+   ESTADÍSTICAS
+   ===================================================== */
+
+function renderStatistics() {
+  const played=matches.filter(m=>m.status==="played");
+  let totalPoints=0;
+  let record=0;
+  const stats=players.map(p=>({...p,points:0,wins:0,losses:0,played:0}));
+
+  const byId=Object.fromEntries(stats.map(p=>[p.id,p]));
+
+  played.forEach(m=>{
+    const s1=Number(m.score1);
+    const s2=Number(m.score2);
+    totalPoints+=s1+s2;
+    record=Math.max(record,s1,s2);
+
+    const p1=byId[m.player1_id];
+    const p2=byId[m.player2_id];
+    if(!p1 || !p2) return;
+
+    p1.points+=s1;
+    p2.points+=s2;
+    p1.played++;
+    p2.played++;
+
+    if(s1>s2) {p1.wins++;p2.losses++;}
+    else if(s2>s1) {p2.wins++;p1.losses++;}
+  });
+
+  document.getElementById("statMatches").textContent=played.length;
+  document.getElementById("statWins").textContent=played.length;
+  document.getElementById("statPoints").textContent=totalPoints;
+  document.getElementById("statRecord").textContent=played.length?record:"—";
+
+  stats.sort((a,b)=>b.points-a.points);
+
+  document.getElementById("individualRanking").innerHTML=stats.length
+    ? `<div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>CLUB / JUGADOR</th><th>PJ</th><th>PG</th><th>PTS ANOTADOS</th></tr></thead>
+        <tbody>${stats.map((p,i)=>`
+          <tr><td>${i+1}</td><td>${playerDisplay(p.id)}</td><td>${p.played}</td><td>${p.wins}</td><td>${p.points}</td></tr>
+        `).join("")}</tbody>
+      </table></div>`
+    : '<p class="empty">Las estadísticas aparecerán cuando se registren resultados.</p>';
+}
+
+/* =====================================================
+   ANUNCIOS
+   ===================================================== */
+
+function renderAnnouncements() {
+  const html=announcements.length
+    ? announcements.map(a=>`
+      <div class="announcement">
+        <h3>${escapeHTML(a.title)}</h3>
+        <p>${escapeHTML(a.content).replace(/\n/g,"<br>")}</p>
+      </div>`).join("")
+    : '<p class="empty">Próximamente, novedades del torneo.</p>';
+
+  document.getElementById("homeAnnouncements").innerHTML=html;
+}
+
+/* =====================================================
+   RENDER GENERAL
+   ===================================================== */
+
+function renderAll() {
+  renderFixture("fixtureA","A");
+  renderFixture("fixtureB","B");
+  renderTable("tableA","A");
+  renderTable("tableB","B");
+  renderPlayoffs();
+  renderStatistics();
+  renderAnnouncements();
+
+  if(isAdmin()) {
+    renderAdminRegistrations();
+    renderAdminPlayers();
+    renderAdminMatches();
+    renderAdminAnnouncements();
+  }
+}
+
+/* =====================================================
+   AUTENTICACIÓN
+   ===================================================== */
+
+async function login() {
+  const email=document.getElementById("loginEmail").value.trim();
+  const password=document.getElementById("loginPassword").value;
+  const message=document.getElementById("loginMessage");
+
+  message.classList.remove("hidden");
+
+  if(!email || !password) {
+    message.textContent="Completá email y contraseña.";
+    return;
+  }
+
+  const {data,error}=await db.auth.signInWithPassword({email,password});
+
+  if(error) {
+    message.textContent=error.message;
+    return;
+  }
+
+  if(data.user.id!==ADMIN_UID) {
+    await db.auth.signOut();
+    message.textContent="Esta cuenta no tiene permisos de administrador.";
+    return;
+  }
+
+  currentUser=data.user;
+  updateAdminUI();
+  await loadData();
+}
+
+async function logout() {
+  const {error}=await db.auth.signOut();
+  if(error) return notifyError(error);
+  currentUser=null;
+  updateAdminUI();
+}
+
+function updateAdminUI() {
+  document.getElementById("loginPanel").classList.toggle("hidden",!!isAdmin());
+  document.getElementById("adminPanel").classList.toggle("hidden",!isAdmin());
+  document.getElementById("adminEmail").textContent=currentUser?.email || "";
+  if(isAdmin()) {
+    renderAdminRegistrations();
+    renderAdminPlayers();
+    renderAdminMatches();
+    renderAdminAnnouncements();
+  }
+}
+
+db.auth.onAuthStateChange((_event,session)=>{
+  currentUser=session?.user || null;
+  updateAdminUI();
+});
+
+/* =====================================================
+   INSCRIPCIONES Y ESCUDOS
+   ===================================================== */
+
+document.getElementById("registrationCrest").addEventListener("change",event=>{
+  const file=event.target.files?.[0];
+  const preview=document.getElementById("crestPreview");
+  if(!file) { preview.classList.add("hidden"); return; }
+  if(!["image/png","image/jpeg","image/webp"].includes(file.type) || file.size>2*1024*1024) {
+    alert("Elegí una imagen PNG, JPG o WebP de hasta 2 MB.");
+    event.target.value="";
+    preview.classList.add("hidden");
+    return;
+  }
+  document.getElementById("crestPreviewImage").src=URL.createObjectURL(file);
+  document.getElementById("crestPreviewName").textContent=file.name;
+  preview.classList.remove("hidden");
+});
+
+async function submitRegistration() {
+  const name=document.getElementById("registrationPlayer").value.trim();
+  const club_name=document.getElementById("registrationClub").value.trim();
+  const file=document.getElementById("registrationCrest").files?.[0];
+  const message=document.getElementById("registrationMessage");
+  const button=document.getElementById("registrationSubmit");
+  message.classList.remove("hidden");
+  if(!name || !club_name || !file) {
+    message.textContent="Completá tu nombre, el nombre del club y adjuntá el escudo.";
+    return;
+  }
+  if(!["image/png","image/jpeg","image/webp"].includes(file.type) || file.size>2*1024*1024) {
+    message.textContent="El escudo debe ser PNG, JPG o WebP y pesar como máximo 2 MB.";
+    return;
+  }
+  button.disabled=true;
+  message.textContent="Enviando inscripción...";
+  try {
+    const extension=file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";
+    const filePath=`${crypto.randomUUID()}.${extension}`;
+    const {error:uploadError}=await db.storage.from("club-crests").upload(filePath,file,{
+      cacheControl:"3600",upsert:false,contentType:file.type
+    });
+    if(uploadError) throw uploadError;
+    const {data:publicData}=db.storage.from("club-crests").getPublicUrl(filePath);
+    const {error:insertError}=await db.from("registrations").insert({
+      player_name:name,club_name,crest_url:publicData.publicUrl,status:"pending"
+    });
+    if(insertError) throw insertError;
+    document.getElementById("registrationPlayer").value="";
+    document.getElementById("registrationClub").value="";
+    document.getElementById("registrationCrest").value="";
+    document.getElementById("crestPreview").classList.add("hidden");
+    message.textContent="¡Inscripción enviada! La organización revisará tu solicitud.";
+  } catch(error) {
+    console.error(error);
+    message.textContent=error.message || "No se pudo enviar la inscripción.";
+  } finally {
+    button.disabled=false;
+  }
+}
+
+async function renderAdminRegistrations() {
+  const target=document.getElementById("adminRegistrations");
+  if(!target || !isAdmin()) return;
+  const {data,error}=await db.from("registrations").select("*")
+    .eq("status","pending").order("created_at",{ascending:true});
+  if(error) {
+    target.innerHTML=`<p class="empty">No se pudieron cargar las inscripciones: ${escapeHTML(error.message)}</p>`;
+    return;
+  }
+  if(!data?.length) {
+    target.innerHTML='<p class="empty">No hay inscripciones pendientes.</p>';
+    return;
+  }
+  target.innerHTML=data.map(r=>`
+    <div class="registration-item">
+      <div class="preview">
+        <img src="${escapeHTML(r.crest_url)}" alt="Escudo de ${escapeHTML(r.club_name)}">
+        <div><strong>${escapeHTML(r.club_name)}</strong><p class="muted" style="font-size:11px">${escapeHTML(r.player_name)}</p></div>
+      </div>
+      <div class="field"><label>ASIGNAR GRUPO</label>
+        <select id="registrationGroup_${r.id}"><option value="A">Grupo A</option><option value="B">Grupo B</option></select>
+      </div>
+      <button class="action" onclick="approveRegistration('${r.id}')">APROBAR E INSCRIBIR</button>
+      <button class="action danger" onclick="rejectRegistration('${r.id}')">RECHAZAR</button>
+    </div>`).join("");
+}
+
+async function approveRegistration(id) {
+  if(!isAdmin()) return alert("No autorizado.");
+  const {data:registration,error:readError}=await db.from("registrations")
+    .select("*").eq("id",id).eq("status","pending").single();
+  if(readError) return notifyError(readError);
+  const group_name=document.getElementById("registrationGroup_"+id).value;
+  if(groupPlayers(group_name).length>=4) return alert(`El Grupo ${group_name} ya tiene cuatro jugadores activos.`);
+  if(players.length>=8) return alert("El torneo ya tiene ocho jugadores activos.");
+  const {data:existing,error:existingError}=await db.from("players")
+    .select("id").eq("name",registration.player_name).eq("club_name",registration.club_name).limit(1);
+  if(existingError) return notifyError(existingError);
+  if(existing?.length) return alert("Ya existe un jugador con ese nombre y club. Revisá la lista de jugadores.");
+  const {error:playerError}=await db.from("players").insert({
+    name:registration.player_name,club_name:registration.club_name,
+    crest_url:registration.crest_url,group_name,active:true
+  });
+  if(playerError) return notifyError(playerError);
+  const {error:updateError}=await db.from("registrations").update({status:"approved"}).eq("id",id);
+  if(updateError) {
+    alert("El jugador se agregó, pero no se pudo actualizar el estado de la solicitud. Revisá la lista antes de volver a aprobar.");
+    console.error(updateError);
+    await loadData();
+    await renderAdminRegistrations();
+    return;
+  }
+  alert("Inscripción aprobada. El jugador y su club ya forman parte del torneo.");
+  await loadData();
+  await renderAdminRegistrations();
+}
+
+async function rejectRegistration(id) {
+  if(!isAdmin()) return alert("No autorizado.");
+  if(!confirm("¿Rechazar esta inscripción?")) return;
+  const {error}=await db.from("registrations").update({status:"rejected"}).eq("id",id);
+  if(error) return notifyError(error);
+  await renderAdminRegistrations();
+}
+
+/* =====================================================
+   ADMINISTRACIÓN DE JUGADORES
+   ===================================================== */
+
+async function addPlayer() {
+  if(!isAdmin()) return alert("No autorizado.");
+
+  const name=document.getElementById("playerName").value.trim();
+  const group_name=document.getElementById("playerGroup").value;
+
+  if(!name) return alert("Ingresá el nombre del jugador.");
+  if(groupPlayers(group_name).length>=4) return alert("Ese grupo ya tiene cuatro jugadores.");
+
+  const {error}=await db.from("players").insert({name,group_name,active:true});
+  if(error) return notifyError(error);
+
+  document.getElementById("playerName").value="";
+  await loadData();
+}
+
+function renderAdminPlayers() {
+  const target=document.getElementById("adminPlayers");
+  if(!target) return;
+
+  target.innerHTML=players.length
+    ? players.map(p=>`
+      <div class="match">
+        <div class="match-players" style="text-align:left">${playerDisplay(p.id)}</div>
+        <span class="match-info">GRUPO ${p.group_name}</span>
+        <button class="action danger" onclick="deactivatePlayer('${p.id}')">DESACTIVAR</button>
+      </div>`).join("")
+    : '<p class="empty">Todavía no hay jugadores.</p>';
+}
+
+async function deactivatePlayer(id) {
+  if(!isAdmin()) return;
+  if(!confirm("¿Desactivar este jugador?")) return;
+
+  const {error}=await db.from("players").update({active:false}).eq("id",id);
+  if(error) return notifyError(error);
+  await loadData();
+}
+
+/* =====================================================
+   GENERACIÓN DEL FIXTURE
+   ===================================================== */
+
+function makeRoundRobin(list) {
+  const result=[];
+  for(let i=0;i<list.length;i++) {
+    for(let j=i+1;j<list.length;j++) {
+      result.push([list[i],list[j]]);
+    }
+  }
+  return result;
+}
+
+async function generateFixture() {
+  if(!isAdmin()) return;
+
+  if(groupPlayers("A").length!==4 || groupPlayers("B").length!==4) {
+    return alert("Necesitás cuatro jugadores activos en cada grupo.");
+  }
+
+  const existing=matches.filter(m=>m.stage==="group");
+  if(existing.length) {
+    return alert("Ya existe un fixture de grupos. No se puede generar otro encima.");
+  }
+
+  const rows=[];
+
+  ["A","B"].forEach(group=>{
+    makeRoundRobin(groupPlayers(group)).forEach((pair,i)=>{
+      rows.push({
+        match_number:i+1,
+        stage:"group",
+        group_name:group,
+        player1_id:pair[0].id,
+        player2_id:pair[1].id,
+        status:"pending"
+      });
+    });
+  });
+
+  const {error}=await db.from("matches").insert(rows);
+  if(error) return notifyError(error);
+
+  alert("Fixture generado correctamente.");
+  await loadData();
+}
+
+/* =====================================================
+   CARGA DE RESULTADOS
+   ===================================================== */
+
+function renderAdminMatches() {
+  const target=document.getElementById("adminMatches");
+  if(!target) return;
+
+  if(!matches.length) {
+    target.innerHTML='<p class="empty">Primero tenés que generar el fixture.</p>';
+    return;
+  }
+
+  target.innerHTML=matches.map(m=>{
+    const stage=m.stage==="group"
+      ? `GRUPO ${m.group_name} · PARTIDO ${m.match_number}`
+      : m.stage==="semifinal" ? `SEMIFINAL ${m.match_number}` : "FINAL";
+
+    return `
+      <div class="admin-match">
+        <strong>${stage}: ${escapeHTML(playerClub(m.player1_id))} vs ${escapeHTML(playerClub(m.player2_id))}</strong>
+        <label style="font-size:10px;color:var(--muted)">MARCADOR</label><br>
+        <input type="number" min="0" max="100" id="score1_${m.id}" value="${m.status==="played"?m.score1:""}" placeholder="0">
+        <span>—</span>
+        <input type="number" min="0" max="100" id="score2_${m.id}" value="${m.status==="played"?m.score2:""}" placeholder="0">
+        <button class="action" onclick="saveResult('${m.id}')">GUARDAR</button>
+        <span class="match-info">${m.status==="played"?"RESULTADO CARGADO":"PENDIENTE"}</span>
+      </div>`;
+  }).join("");
+}
+
+async function saveResult(id) {
+  if(!isAdmin()) return;
+
+  const m=matches.find(x=>x.id===id);
+  if(!m) return;
+
+  const s1=document.getElementById("score1_"+id).value;
+  const s2=document.getElementById("score2_"+id).value;
+
+  if(s1==="" || s2==="") return alert("Completá los dos marcadores.");
+
+  const score1=Number(s1);
+  const score2=Number(s2);
+
+  if(!Number.isInteger(score1) || !Number.isInteger(score2) || score1<0 || score2<0) {
+    return alert("Los resultados deben ser números enteros iguales o mayores a cero.");
+  }
+
+  if(score1===score2) return alert("No puede haber empate. El partido debe tener un ganador.");
+
+  const {error}=await db.from("matches").update({
+    score1,score2,status:"played"
+  }).eq("id",id);
+
+  if(error) return notifyError(error);
+
+  alert("Resultado guardado.");
+  await loadData();
+}
+
+/* =====================================================
+   GENERAR SEMIFINALES
+   ===================================================== */
+
+async function generatePlayoffs() {
+  if(!isAdmin()) return;
+
+  if(matches.some(m=>m.stage==="semifinal" || m.stage==="final")) {
+    return alert("Ya existen partidos de playoffs.");
+  }
+
+  const groupGames=matches.filter(m=>m.stage==="group");
+  if(groupGames.length!==12 || groupGames.some(m=>m.status!=="played")) {
+    return alert("Primero deben estar jugados los 12 partidos de grupos.");
+  }
+
+  const a=calculateStandings("A");
+  const b=calculateStandings("B");
+
+  if(a.length!==4 || b.length!==4) return alert("No se encontraron los ocho jugadores.");
+
+  if(a[0].tournamentPoints===a[1].tournamentPoints && a[0].difference===a[1].difference) {
+    return alert("Hay empate total en el Grupo A. La organización debe resolverlo antes de generar playoffs.");
+  }
+  if(b[0].tournamentPoints===b[1].tournamentPoints && b[0].difference===b[1].difference) {
+    return alert("Hay empate total en el Grupo B. La organización debe resolverlo antes de generar playoffs.");
+  }
+
+  const rows=[
+    {
+      match_number:1,stage:"semifinal",group_name:null,
+      player1_id:a[0].id,player2_id:b[1].id,status:"pending"
+    },
+    {
+      match_number:2,stage:"semifinal",group_name:null,
+      player1_id:b[0].id,player2_id:a[1].id,status:"pending"
+    }
+  ];
+
+  const {error}=await db.from("matches").insert(rows);
+  if(error) return notifyError(error);
+
+  alert("Semifinales generadas.");
+  await loadData();
+}
+
+/* =====================================================
+   GENERAR FINAL
+   ===================================================== */
+
+async function generateFinal() {
+  if(!isAdmin()) return;
+
+  if(getMatch("final")) return alert("La final ya fue generada.");
+
+  const semis=matches.filter(m=>m.stage==="semifinal");
+
+  if(semis.length!==2 || semis.some(m=>m.status!=="played")) {
+    return alert("Primero deben estar cargados los resultados de las dos semifinales.");
+  }
+
+  const winners=semis.map(m=>m.score1>m.score2?m.player1_id:m.player2_id);
+
+  if(winners[0]===winners[1]) return alert("Error: los dos ganadores son el mismo jugador.");
+
+  const {error}=await db.from("matches").insert({
+    match_number:1,
+    stage:"final",
+    group_name:null,
+    player1_id:winners[0],
+    player2_id:winners[1],
+    status:"pending"
+  });
+
+  if(error) return notifyError(error);
+
+  alert("Final generada.");
+  await loadData();
+}
+
+/* =====================================================
+   ADMINISTRACIÓN DE ANUNCIOS
+   ===================================================== */
+
+async function addAnnouncement() {
+  if(!isAdmin()) return;
+
+  const title=document.getElementById("announcementTitle").value.trim();
+  const content=document.getElementById("announcementContent").value.trim();
+
+  if(!title || !content) return alert("Completá el título y el contenido.");
+
+  const {error}=await db.from("announcements").insert({
+    title,content,published:true
+  });
+
+  if(error) return notifyError(error);
+
+  document.getElementById("announcementTitle").value="";
+  document.getElementById("announcementContent").value="";
+
+  alert("Anuncio publicado.");
+  await loadData();
+}
+
+async function renderAdminAnnouncements() {
+  const target=document.getElementById("adminAnnouncements");
+  if(!target || !isAdmin()) return;
+
+  const {data,error}=await db.from("announcements")
+    .select("*").order("created_at",{ascending:false});
+
+  if(error) {
+    target.innerHTML='<p class="empty">No se pudieron cargar los anuncios.</p>';
+    return;
+  }
+
+  target.innerHTML=(data||[]).map(a=>`
+    <div class="announcement">
+      <h3>${escapeHTML(a.title)}</h3>
+      <p>${escapeHTML(a.content)}</p>
+      <button class="action danger" onclick="deleteAnnouncement('${a.id}')">ELIMINAR</button>
+    </div>`).join("") || '<p class="empty">No hay anuncios.</p>';
+}
+
+async function deleteAnnouncement(id) {
+  if(!isAdmin()) return;
+  if(!confirm("¿Eliminar este anuncio?")) return;
+
+  const {error}=await db.from("announcements").delete().eq("id",id);
+  if(error) return notifyError(error);
+  await loadData();
+}
+
+/* =====================================================
+   INICIALIZACIÓN
+   ===================================================== */
+
+async function init() {
+  try {
+    const {data,error}=await db.auth.getSession();
+    if(error) throw error;
+
+    currentUser=data.session?.user || null;
+    updateAdminUI();
+    await loadData();
+
+  } catch(error) {
+    setStatus("NO SE PUDO CONECTAR","error");
+    console.error(error);
+  }
+}
+
+init();
+
+/* Actualización periódica de los datos públicos */
+setInterval(()=>{
+  loadData();
+},15000);
+</script>
+</body>
+</html>
