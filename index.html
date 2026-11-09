@@ -151,6 +151,42 @@ footer strong {color:var(--orange)}
   footer {flex-direction:column;gap:12px}
   .form-grid {grid-template-columns:1fr}
 }
+
+/* =====================================================
+   IDENTIDAD TORNEO 21 · BARILOCHE
+   Capa visual renovada; conserva el sistema de datos.
+   ===================================================== */
+:root{--cream:#F5F1E8;--paper:#172B42;--burgundy:#F47A20;--brown:#C9D4DF;--orange:#FF8126;--ink:#F5F1E8;--muted:#A7B6C6;--line:#29435D;--white:#13263B;--navy:#081625;--lake:#6F9DB5}
+html{scroll-behavior:smooth}
+body{background:#0A192B;color:var(--cream);background-image:radial-gradient(ellipse at 85% 8%,rgba(39,89,123,.18),transparent 35%),linear-gradient(180deg,#0A192B 0%,#0D2034 55%,#081625 100%);overflow-x:hidden}
+header{min-height:78px;background:rgba(8,22,37,.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,129,38,.28);box-shadow:0 8px 28px rgba(0,0,0,.18)}
+.logo{color:#F5F1E8;font-size:32px;letter-spacing:1.5px;text-shadow:0 0 24px rgba(244,122,32,.16)}.logo span{color:var(--orange)}
+nav{gap:clamp(9px,1.5vw,22px)}nav button{color:#C9D4DF;font-size:10px;letter-spacing:1.3px;transition:color .2s,transform .2s}nav button:hover,nav button.active{color:var(--orange);transform:translateY(-2px)}.menu{color:var(--orange)}
+.hero{min-height:min(760px,calc(100vh - 78px));padding:100px 9% 150px;background:linear-gradient(90deg,rgba(5,16,28,.96) 0%,rgba(5,16,28,.78) 48%,rgba(5,16,28,.25) 100%),linear-gradient(0deg,rgba(8,22,37,.9),transparent 45%),url("https://images.unsplash.com/photo-1519861531473-9200262188bf?w=2000&q=90") center 48%/cover;isolation:isolate}
+.hero:before{content:"";position:absolute;width:clamp(220px,34vw,520px);aspect-ratio:1;border:2px solid rgba(255,129,38,.35);border-radius:50%;right:8%;top:16%;z-index:0;opacity:.7;background:linear-gradient(90deg,transparent 49.7%,rgba(255,129,38,.35) 50%,transparent 50.3%),linear-gradient(0deg,transparent 49.7%,rgba(255,129,38,.35) 50%,transparent 50.3%);box-shadow:inset 0 0 0 24px rgba(255,129,38,.12),0 0 70px rgba(255,129,38,.08);animation:ballFloat 8s ease-in-out infinite}
+.hero:after{content:"21";position:absolute;right:8%;top:3%;font-family:Anton,sans-serif;font-size:clamp(220px,36vw,520px);line-height:1;color:transparent;-webkit-text-stroke:2px rgba(245,241,232,.16);z-index:0;animation:numberPulse 6s ease-in-out infinite}
+.hero-content{max-width:800px;z-index:2;animation:heroEnter .9s cubic-bezier(.2,.8,.2,1) both}.eyebrow{color:var(--orange);font-size:10px;letter-spacing:4px;font-weight:900}
+.hero h1{font-size:clamp(76px,11vw,148px);line-height:.82;letter-spacing:-1px;text-shadow:0 10px 35px rgba(0,0,0,.25)}.hero h1 span{color:var(--orange);text-shadow:0 0 36px rgba(244,122,32,.2)}.hero p{color:#E0E7ED;font-size:15px;line-height:1.9;max-width:480px}
+.tag{display:inline-flex;align-items:center;gap:12px;margin-top:30px;padding:16px 23px;background:var(--orange);color:#111C28;border:0;font-size:10px;font-weight:900;letter-spacing:1.4px;box-shadow:5px 5px 0 rgba(255,255,255,.12);transition:transform .2s,box-shadow .2s,background .2s;animation:ctaPulse 2.8s ease-in-out infinite}.tag:hover{transform:translate(-3px,-3px);box-shadow:8px 8px 0 rgba(255,255,255,.13);background:#FF9A4D}
+.hero-mountains{position:absolute;left:0;right:0;bottom:-1px;height:150px;z-index:1;pointer-events:none}.hero-mountains svg{width:100%;height:100%;display:block}
+.ticker{overflow:hidden;background:var(--orange);color:#101D2B;padding:13px 0;white-space:nowrap;position:relative;z-index:2}.ticker-track{display:flex;align-items:center;justify-content:space-around;gap:35px;width:max-content;min-width:200%;animation:tickerMove 28s linear infinite;font-family:"Barlow Condensed",sans-serif;font-size:18px;font-weight:900;letter-spacing:2px}.ticker-track b{font-size:17px}
+.section{padding:78px 8%;background:transparent;position:relative}.section:nth-of-type(odd){background:rgba(255,255,255,.018)}.section-heading{margin-bottom:35px}.section-heading h2{font-size:clamp(38px,5vw,62px);line-height:.95;color:#F5F1E8}.section-heading p{color:var(--muted)}h2,h3{font-family:Anton,sans-serif;letter-spacing:.4px}.orange{color:var(--orange)}
+.cards{gap:16px}.stat{position:relative;overflow:hidden;padding:25px;background:linear-gradient(145deg,#172D45,#102238);border:1px solid #29435D;box-shadow:5px 5px 0 rgba(244,122,32,.15);transition:transform .25s,border-color .25s,box-shadow .25s}.stat:after{content:"";position:absolute;width:90px;height:90px;border:1px solid rgba(255,129,38,.18);border-radius:50%;right:-35px;bottom:-40px}.stat:hover{transform:translateY(-7px);border-color:var(--orange);box-shadow:8px 10px 0 rgba(244,122,32,.18)}.stat .big-number{font-size:64px;color:var(--orange);line-height:1}.stat p{color:#B9C7D3;letter-spacing:1.5px}
+.panel{background:linear-gradient(145deg,#142A41,#102238);border:1px solid #29435D;padding:26px;box-shadow:5px 5px 0 rgba(0,0,0,.15);color:var(--cream)}.panel h3{color:var(--orange);font-size:27px}.group-title{border-bottom:2px solid var(--orange)}.group-title h3{color:var(--cream)}
+table{color:var(--cream)}th{color:#A7B6C6;border-bottom:1px solid #35516D}td{border-bottom:1px solid #263F59;color:#E8EEF3}td:first-child{color:var(--orange)}.muted,.match-info{color:#A7B6C6}.match{border-bottom:1px solid #29435D}.match-score{color:var(--orange)}
+.bracket-card{background:#142A41;border-left:5px solid var(--orange);color:var(--cream)}.bracket-card h3{color:var(--orange)}.placeholder{background:#203B56;color:#C5D0DA}
+.rule{border-bottom:1px solid #29435D}.rule strong{color:var(--orange)}.rule p{color:#D1DCE5}
+.dark-section{background:linear-gradient(120deg,#F47A20,#FF9A4D);color:#101D2B}.dark-section .section-heading h2,.dark-section .eyebrow{color:#101D2B}.dark-section p{color:#182B3E}
+.action{background:var(--orange);color:#111C28;transition:transform .2s,filter .2s}.action:hover{background:#FF9A4D;color:#111C28;transform:translateY(-2px);filter:brightness(1.05)}.action.secondary{background:#6F9DB5;color:#081625}.action.danger{background:#B8443C;color:#fff}
+.field label{color:#A7B6C6}.field input,.field select,.field textarea{background:#0B1B2D;border:1px solid #35516D;color:#F5F1E8}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(244,122,32,.12)}
+.notice,.status{background:#203B56;color:#DCE5EC}.status.ok{background:#DCE8D5;color:#315C37}.status.error{background:#F2D8D3;color:#8A3029}.empty{color:#A7B6C6}
+.announcement{background:#172D45;border-left-color:var(--orange)}.announcement h3{color:var(--orange)}.announcement p{color:#D1DCE5}.club-mark,.club-inline img{background:#F5F1E8;border-color:#35516D}.registration-preview{background:#203B56}.registration-preview img{background:#F5F1E8}.registration-item{border-color:#29435D}
+footer{background:#050F1B;border-top:1px solid rgba(255,129,38,.3);color:#B9C7D3}footer strong{color:var(--orange)}
+.page.active .section{animation:sectionEnter .55s ease both}.page.active .section:nth-child(2){animation-delay:.08s}.page.active .section:nth-child(3){animation-delay:.15s}.hero-mountains{animation:mountainRise 1.2s ease-out both}
+@keyframes heroEnter{from{opacity:0;transform:translateY(35px)}to{opacity:1;transform:translateY(0)}}@keyframes sectionEnter{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}@keyframes ballFloat{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-16px) rotate(8deg)}}@keyframes numberPulse{0%,100%{opacity:.65;transform:scale(1)}50%{opacity:1;transform:scale(1.025)}}@keyframes ctaPulse{0%,100%{box-shadow:5px 5px 0 rgba(255,255,255,.12)}50%{box-shadow:5px 5px 0 rgba(255,255,255,.12),0 0 28px rgba(244,122,32,.3)}}@keyframes tickerMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}@keyframes mountainRise{from{opacity:0;transform:translateY(35px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:800px){header{background:rgba(8,22,37,.97)}nav{background:#0A192B;border-bottom:1px solid #29435D}nav button{text-align:left;padding:5px 0}.hero{min-height:620px;padding:80px 7% 145px;background-position:58% center}.hero:before{width:230px;right:-60px;top:28%;opacity:.5}.hero:after{font-size:230px;right:-12%;top:20%;opacity:.7}.hero h1{font-size:clamp(70px,17vw,110px)}.hero-mountains{height:115px}.ticker-track{font-size:15px;gap:22px}.section{padding:55px 6%}.cards{grid-template-columns:1fr 1fr}.panel{padding:19px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
 </style>
 </head>
 
@@ -174,11 +210,20 @@ footer strong {color:var(--orange)}
 <section id="inicio" class="page active">
   <div class="hero">
     <div class="hero-content">
-      <div class="eyebrow">VERANO 2026 / 2027 · PRIMERA EDICIÓN</div>
-      <h1>LA CANCHA.<br>EL UNO CONTRA<br><span>UNO.</span></h1>
-      <p>Ocho jugadores. Dos grupos. Un solo campeón.<br>La competencia se define en 21 puntos.</p>
-      <div class="tag" id="heroTag">TORNEO OFICIAL · VERANO 2026/27</div>
+      <div class="eyebrow">BARILOCHE · PATAGONIA · VERANO 2026/2027</div>
+      <h1>EL JUEGO<br>SE DEFINE<br><span>EN 21.</span></h1>
+      <p>Ocho jugadores. Dos grupos. Un solo campeón.<br>Una pelota, un rival y un objetivo: llegar a 21.</p>
+      <button class="tag" id="heroTag" onclick="showPage('inscripcion',document.querySelector('nav button:nth-child(7)'))">INSCRIPCIONES · SUMATE AL TORNEO ↗</button>
     </div>
+    <div class="hero-mountains" aria-hidden="true">
+      <svg viewBox="0 0 1600 220" preserveAspectRatio="none">
+        <path d="M0 180 L130 90 L220 145 L360 35 L500 150 L620 75 L760 160 L900 45 L1040 150 L1160 70 L1300 155 L1430 85 L1600 175 L1600 220 L0 220 Z" fill="#0A192B"/>
+        <path d="M0 192 L180 130 L310 175 L470 105 L610 180 L790 115 L940 180 L1110 105 L1280 178 L1450 125 L1600 180 L1600 220 L0 220 Z" fill="#10243A"/>
+      </svg>
+    </div>
+  </div>
+  <div class="ticker" aria-label="Torneo 21 Bariloche">
+    <div class="ticker-track"><span>BARILOCHE</span><b>✳</b><span>UNO CONTRA UNO</span><b>✳</b><span>21 PUNTOS</span><b>✳</b><span>UN SOLO CAMPEÓN</span><b>✳</b><span>BARILOCHE</span><b>✳</b><span>UNO CONTRA UNO</span><b>✳</b><span>21 PUNTOS</span><b>✳</b><span>UN SOLO CAMPEÓN</span><b>✳</b></div>
   </div>
   <div class="section">
     <div class="section-heading">
