@@ -164,6 +164,7 @@ footer strong {color:var(--orange)}
     <button onclick="showPage('playoffs',this)">Playoffs</button>
     <button onclick="showPage('estadisticas',this)">Estadísticas</button>
     <button onclick="showPage('reglamento',this)">Reglamento</button>
+    <button onclick="showPage('inscripcion',this)">Inscripción</button>
     <button onclick="showPage('administracion',this)">Administración</button>
   </nav>
   <button class="menu" onclick="toggleMenu()">☰</button>
@@ -296,6 +297,24 @@ footer strong {color:var(--orange)}
       <div class="rule"><p>La organización anuncia cuándo se habilita esta posibilidad.</p></div>
     </div>
   </div>
+</section>
+
+<section id="inscripcion" class="page">
+  <div class="section"><div class="admin-wrap">
+    <div class="eyebrow">FORMÁ PARTE DE LA COMPETENCIA</div>
+    <h2 style="font-size:55px;margin-bottom:10px">INSCRIPCIÓN</h2>
+    <p class="muted" style="font-size:12px;line-height:1.8;margin-bottom:25px">Cada participante representa a su propio club. Presentá tu nombre, el nombre del club y su escudo oficial. La inscripción queda pendiente hasta que la organización la apruebe.</p>
+    <div class="panel">
+      <h3>INSCRIBÍ TU CLUB</h3>
+      <div class="field"><label>NOMBRE DEL JUGADOR</label><input id="registrationPlayer" maxlength="80" placeholder="Nombre y apellido"></div>
+      <div class="field"><label>NOMBRE DEL CLUB</label><input id="registrationClub" maxlength="80" placeholder="Ej. Club Atlético ..."></div>
+      <div class="field"><label>ESCUDO DEL CLUB · PNG, JPG O WEBP · MÁXIMO 2 MB</label><input id="registrationCrest" type="file" accept="image/png,image/jpeg,image/webp"></div>
+      <div id="crestPreview" class="registration-preview hidden"><img id="crestPreviewImage" alt="Vista previa del escudo"><div><strong id="crestPreviewName"></strong><p class="muted" style="font-size:10px">Vista previa del escudo seleccionado</p></div></div>
+      <button class="action" id="registrationSubmit" onclick="submitRegistration()">ENVIAR INSCRIPCIÓN</button>
+      <p id="registrationMessage" class="notice hidden" role="status"></p>
+    </div>
+    <div class="notice">La organización revisará tu solicitud y asignará el grupo. El envío del formulario no garantiza una plaza hasta que la inscripción sea aprobada.</div>
+  </div></div>
 </section>
 
 <section id="administracion" class="page">
@@ -779,6 +798,132 @@ db.auth.onAuthStateChange((_event,session)=>{
 /* =====================================================
    INSCRIPCIONES Y ESCUDOS
    ===================================================== */
+
+async function renderAdminRegistrations() {
+  const target=document.getElementById("adminRegistrations");
+  if(!target || !isAdmin()) return;
+  const {data,error}=await db.from("registrations").select("*")
+    .eq("status","pending").order("created_at",{ascending:true});
+  if(error) {
+    target.innerHTML=`<p class="empty">No se pudieron cargar las inscripciones: ${escapeHTML(error.message)}</p>`;
+    return;
+  }
+  if(!data?.length) {
+    target.innerHTML='<p class="empty">No hay inscripciones pendientes.</p>';
+    return;
+  }
+  target.innerHTML=data.map(r=>`
+    <div class="registration-item">
+      <div class="preview">
+        <img src="${escapeHTML(r.crest_url)}" alt="Escudo de ${escapeHTML(r.club_name)}">
+        <div><strong>${escapeHTML(r.club_name)}</strong><p class="muted" style="font-size:11px">${escapeHTML(r.player_name)}</p></div>
+      </div>
+      <div class="field"><label>ASIGNAR GRUPO</label>
+        <select id="registrationGroup_${r.id}"><option value="A">Grupo A</option><option value="B">Grupo B</option></select>
+      </div>
+      <button class="action" onclick="approveRegistration('${r.id}')">APROBAR E INSCRIBIR</button>
+      <button class="action danger" onclick="rejectRegistration('${r.id}')">RECHAZAR</button>
+    </div>`).join("");
+}
+
+async function approveRegistration(id) {
+  if(!isAdmin()) return alert("No autorizado.");
+  const {data:registration,error:readError}=await db.from("registrations")
+    .select("*").eq("id",id).eq("status","pending").single();
+  if(readError) return notifyError(readError);
+  const group_name=document.getElementById("registrationGroup_"+id).value;
+  if(groupPlayers(group_name).length>=4) return alert(`El Grupo ${group_name} ya tiene cuatro jugadores activos.`);
+  if(players.length>=8) return alert("El torneo ya tiene ocho jugadores activos.");
+  const {data:existing,error:existingError}=await db.from("players")
+    .select("id").eq("name",registration.player_name).eq("club_name",registration.club_name).limit(1);
+  if(existingError) return notifyError(existingError);
+  if(existing?.length) return alert("Ya existe un jugador con ese nombre y club. Revisá la lista de jugadores.");
+  const {error:playerError}=await db.from("players").insert({
+    name:registration.player_name,club_name:registration.club_name,
+    crest_url:registration.crest_url,group_name,active:true
+  });
+  if(playerError) return notifyError(playerError);
+  const {error:updateError}=await db.from("registrations").update({status:"approved"}).eq("id",id);
+  if(updateError) {
+    alert("El jugador se agregó, pero no se pudo actualizar el estado de la solicitud. Revisá la lista antes de volver a aprobar.");
+    console.error(updateError);
+    await loadData();
+    await renderAdminRegistrations();
+    return;
+  }
+  alert("Inscripción aprobada. El jugador y su club ya forman parte del torneo.");
+  await loadData();
+  await renderAdminRegistrations();
+}
+
+async function rejectRegistration(id) {
+  if(!isAdmin()) return alert("No autorizado.");
+  if(!confirm("¿Rechazar esta inscripción?")) return;
+  const {error}=await db.from("registrations").update({status:"rejected"}).eq("id",id);
+  if(error) return notifyError(error);
+  await renderAdminRegistrations();
+}
+
+/* =====================================================
+   INSCRIPCIONES Y ESCUDOS
+   ===================================================== */
+
+document.getElementById("registrationCrest").addEventListener("change",event=>{
+  const file=event.target.files?.[0];
+  const preview=document.getElementById("crestPreview");
+  if(!file) { preview.classList.add("hidden"); return; }
+  if(!["image/png","image/jpeg","image/webp"].includes(file.type) || file.size>2*1024*1024) {
+    alert("Elegí una imagen PNG, JPG o WebP de hasta 2 MB.");
+    event.target.value="";
+    preview.classList.add("hidden");
+    return;
+  }
+  document.getElementById("crestPreviewImage").src=URL.createObjectURL(file);
+  document.getElementById("crestPreviewName").textContent=file.name;
+  preview.classList.remove("hidden");
+});
+
+async function submitRegistration() {
+  const name=document.getElementById("registrationPlayer").value.trim();
+  const club_name=document.getElementById("registrationClub").value.trim();
+  const file=document.getElementById("registrationCrest").files?.[0];
+  const message=document.getElementById("registrationMessage");
+  const button=document.getElementById("registrationSubmit");
+  message.classList.remove("hidden");
+  if(!name || !club_name || !file) {
+    message.textContent="Completá tu nombre, el nombre del club y adjuntá el escudo.";
+    return;
+  }
+  if(!["image/png","image/jpeg","image/webp"].includes(file.type) || file.size>2*1024*1024) {
+    message.textContent="El escudo debe ser PNG, JPG o WebP y pesar como máximo 2 MB.";
+    return;
+  }
+  button.disabled=true;
+  message.textContent="Enviando inscripción...";
+  try {
+    const extension=file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";
+    const filePath=`${crypto.randomUUID()}.${extension}`;
+    const {error:uploadError}=await db.storage.from("club-crests").upload(filePath,file,{
+      cacheControl:"3600",upsert:false,contentType:file.type
+    });
+    if(uploadError) throw uploadError;
+    const {data:publicData}=db.storage.from("club-crests").getPublicUrl(filePath);
+    const {error:insertError}=await db.from("registrations").insert({
+      player_name:name,club_name,crest_url:publicData.publicUrl,status:"pending"
+    });
+    if(insertError) throw insertError;
+    document.getElementById("registrationPlayer").value="";
+    document.getElementById("registrationClub").value="";
+    document.getElementById("registrationCrest").value="";
+    document.getElementById("crestPreview").classList.add("hidden");
+    message.textContent="¡Inscripción enviada! La organización revisará tu solicitud.";
+  } catch(error) {
+    console.error(error);
+    message.textContent=error.message || "No se pudo enviar la inscripción.";
+  } finally {
+    button.disabled=false;
+  }
+}
 
 async function renderAdminRegistrations() {
   const target=document.getElementById("adminRegistrations");
