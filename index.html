@@ -324,12 +324,10 @@ footer,footer div,footer strong{color:#FFFFFF}
   <div class="section">
     <div class="eyebrow">CALENDARIO OFICIAL</div>
     <h2 style="font-size:55px;margin-bottom:10px">FIXTURE</h2>
-    <p class="muted" style="margin-bottom:30px">Fase de grupos · Todos contra todos</p>
-    <div class="group-grid">
-      <div class="panel"><div class="group-title"><h3>GRUPO A</h3><span class="orange">06 PARTIDOS</span></div><div id="fixtureA"></div></div>
-      <div class="panel"><div class="group-title"><h3>GRUPO B</h3><span class="orange">06 PARTIDOS</span></div><div id="fixtureB"></div></div>
-    </div>
-    <p class="muted">Fechas y horarios: por definir.</p>
+    <p class="muted" style="margin-bottom:30px">12 partidos de grupos distribuidos en dos jornadas · Todos contra todos</p>
+    <div class="panel"><div class="group-title"><h3>JORNADA 1</h3><span class="orange">3 Y 3 PARTIDOS</span></div><p class="muted">Jueves 3 de diciembre de 2026 · Tarde</p><div class="group-grid"><div><h3>GRUPO A</h3><div id="fixtureA_day1"></div></div><div><h3>GRUPO B</h3><div id="fixtureB_day1"></div></div></div></div>
+    <div class="panel"><div class="group-title"><h3>JORNADA 2</h3><span class="orange">3 Y 3 PARTIDOS</span></div><p class="muted">Sábado 5 de diciembre de 2026 · Tarde</p><div class="group-grid"><div><h3>GRUPO A</h3><div id="fixtureA_day2"></div></div><div><h3>GRUPO B</h3><div id="fixtureB_day2"></div></div></div></div>
+    <div class="panel"><div class="group-title"><h3>JORNADA 3 · FASE FINAL</h3><span class="orange">3 PARTIDOS</span></div><p class="muted">Lunes 7 de diciembre de 2026 · Tarde</p><p>Semifinal 1 · 1.º Grupo A vs. 2.º Grupo B</p><p>Semifinal 2 · 1.º Grupo B vs. 2.º Grupo A</p><p>Gran final · Ganadores de semifinales</p></div>
   </div>
 </section>
 
@@ -633,29 +631,31 @@ function groupMatches(group) {
 }
 
 function renderFixture(id,group) {
-  const target=document.getElementById(id);
   const games=groupMatches(group);
-
-  if(!games.length) {
-    target.innerHTML='<p class="empty">El fixture todavía no fue generado.</p>';
-    return;
-  }
-
-  target.innerHTML=games.map(m=>`
-    <div class="match">
-      <div class="match-info">PARTIDO ${m.match_number}</div>
-      <div class="match-content">
-        <div class="match-team-row">
-          <div class="match-players">${playerDisplay(m.player1_id)}</div>
-          <div class="match-score">${m.status==="played" ? m.score1 : "—"}</div>
-        </div>
-        <div class="match-team-row">
-          <div class="match-players">${playerDisplay(m.player2_id)}</div>
-          <div class="match-score">${m.status==="played" ? m.score2 : "—"}</div>
+  [1,2].forEach(day=>{
+    const target=document.getElementById(`${id}_day${day}`);
+    if(!target) return;
+    const dayGames=games.filter(m=>Number(m.match_number)<=3 ? day===1 : day===2);
+    if(!games.length) {
+      target.innerHTML='<p class="empty">El fixture todavía no fue generado.</p>';
+      return;
+    }
+    target.innerHTML=dayGames.map(m=>`
+      <div class="match">
+        <div class="match-info">PARTIDO ${m.match_number}</div>
+        <div class="match-content">
+          <div class="match-team-row">
+            <div class="match-players">${playerDisplay(m.player1_id)}</div>
+            <div class="match-score">${m.status==="played" ? m.score1 : "—"}</div>
+          </div>
+          <div class="match-team-row">
+            <div class="match-players">${playerDisplay(m.player2_id)}</div>
+            <div class="match-score">${m.status==="played" ? m.score2 : "—"}</div>
+          </div>
         </div>
       </div>
-    </div>
-  `).join("");
+    `).join("") || '<p class="empty">Sin partidos asignados.</p>';
+  });
 }
 
 /* =====================================================
@@ -1185,13 +1185,16 @@ async function deactivatePlayer(id) {
    ===================================================== */
 
 function makeRoundRobin(list) {
-  const result=[];
-  for(let i=0;i<list.length;i++) {
-    for(let j=i+1;j<list.length;j++) {
-      result.push([list[i],list[j]]);
-    }
-  }
-  return result;
+  if(list.length!==4) return [];
+  // Tres partidos por grupo en cada una de las dos jornadas.
+  return [
+    [list[0],list[1]],
+    [list[2],list[3]],
+    [list[0],list[2]],
+    [list[1],list[3]],
+    [list[0],list[3]],
+    [list[1],list[2]]
+  ];
 }
 
 async function generateFixture() {
