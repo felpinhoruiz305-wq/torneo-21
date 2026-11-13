@@ -418,19 +418,19 @@ footer,footer div,footer strong{color:#FFFFFF}
 
 <section id="inscripcion" class="page">
   <div class="section"><div class="admin-wrap">
-    <div class="eyebrow">FORMÁ PARTE DE LA COMPETENCIA</div>
-    <h2 style="font-size:55px;margin-bottom:10px">INSCRIPCIÓN</h2>
-    <p class="muted" style="font-size:12px;line-height:1.8;margin-bottom:25px">Cada participante representa a su propio club. Presentá tu nombre, el nombre del club y su escudo oficial. La inscripción queda pendiente hasta que la organización la apruebe.</p>
+    <div class="eyebrow">CONVOCATORIA ABIERTA · BARILOCHE 2026</div>
+    <h2 style="font-size:clamp(44px,6vw,68px);margin-bottom:10px">POSTULÁ TU<br><span class="orange">LUGAR EN EL 21</span></h2>
+    <p class="muted" style="font-size:13px;line-height:1.9;margin-bottom:25px">La convocatoria está abierta para todos. Completá tus datos y postulá para ocupar una de las 8 plazas del torneo. Cada jugador compite de manera individual y representa a su club: por eso necesitamos el nombre y el escudo oficial.</p>
     <div class="panel">
-      <h3>INSCRIBÍ TU CLUB</h3>
-      <div class="field"><label>NOMBRE DEL JUGADOR</label><input id="registrationPlayer" maxlength="80" placeholder="Nombre y apellido"></div>
-      <div class="field"><label>NOMBRE DEL CLUB</label><input id="registrationClub" maxlength="80" placeholder="Ej. Club Atlético ..."></div>
-      <div class="field"><label>ESCUDO DEL CLUB · PNG, JPG O WEBP · MÁXIMO 2 MB</label><input id="registrationCrest" type="file" accept="image/png,image/jpeg,image/webp"></div>
+      <h3>DATOS DEL JUGADOR Y SU CLUB</h3>
+      <div class="field"><label>NOMBRE Y APELLIDO DEL JUGADOR</label><input id="registrationPlayer" maxlength="80" autocomplete="name" placeholder="Tu nombre y apellido"></div>
+      <div class="field"><label>CLUB AL QUE REPRESENTÁS</label><input id="registrationClub" maxlength="80" placeholder="Nombre del club"></div>
+      <div class="field"><label>ESCUDO OFICIAL · PNG, JPG O WEBP · MÁXIMO 2 MB</label><input id="registrationCrest" type="file" accept="image/png,image/jpeg,image/webp"></div>
       <div id="crestPreview" class="registration-preview hidden"><img id="crestPreviewImage" alt="Vista previa del escudo"><div><strong id="crestPreviewName"></strong><p class="muted" style="font-size:10px">Vista previa del escudo seleccionado</p></div></div>
-      <button class="action" id="registrationSubmit" onclick="submitRegistration()">ENVIAR INSCRIPCIÓN</button>
+      <button class="action" id="registrationSubmit" onclick="submitRegistration()">ENVIAR POSTULACIÓN</button>
       <p id="registrationMessage" class="notice hidden" role="status"></p>
     </div>
-    <div class="notice">La organización revisará tu solicitud y asignará el grupo. El envío del formulario no garantiza una plaza hasta que la inscripción sea aprobada.</div>
+    <div class="notice"><strong>IMPORTANTE:</strong> hay 8 lugares disponibles. La organización evaluará las postulaciones y confirmará a los participantes seleccionados. Enviar el formulario no garantiza una plaza. Una vez aprobada tu inscripción, se te asignará un grupo.</div>
   </div></div>
 </section>
 
@@ -1038,7 +1038,7 @@ async function submitRegistration() {
   const button=document.getElementById("registrationSubmit");
   message.classList.remove("hidden");
   if(!name || !club_name || !file) {
-    message.textContent="Completá tu nombre, el nombre del club y adjuntá el escudo.";
+    message.textContent="Completá tu nombre, el club al que representás y adjuntá su escudo.";
     return;
   }
   if(!["image/png","image/jpeg","image/webp"].includes(file.type) || file.size>2*1024*1024) {
@@ -1063,7 +1063,7 @@ async function submitRegistration() {
     document.getElementById("registrationClub").value="";
     document.getElementById("registrationCrest").value="";
     document.getElementById("crestPreview").classList.add("hidden");
-    message.textContent="¡Inscripción enviada! La organización revisará tu solicitud.";
+    message.textContent="¡Postulación enviada! La organización revisará tus datos y te contactará si obtenés una de las 8 plazas.";
   } catch(error) {
     console.error(error);
     message.textContent=error.message || "No se pudo enviar la inscripción.";
