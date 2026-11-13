@@ -423,9 +423,9 @@ footer,footer div,footer strong{color:#FFFFFF}
     <p class="muted" style="font-size:13px;line-height:1.9;margin-bottom:25px">La convocatoria está abierta para todos. Completá tus datos y postulá para ocupar una de las 8 plazas del torneo. Cada jugador compite de manera individual y representa a su club: por eso necesitamos el nombre y el escudo oficial.</p>
     <div class="panel">
       <h3>DATOS DEL JUGADOR Y SU CLUB</h3>
-      <div class="field"><label>NOMBRE Y APELLIDO DEL JUGADOR</label><input id="registrationPlayer" maxlength="80" autocomplete="name" placeholder="Tu nombre y apellido"></div>
-      <div class="field"><label>CLUB AL QUE REPRESENTÁS</label><input id="registrationClub" maxlength="80" placeholder="Nombre del club"></div>
-      <div class="field"><label>ESCUDO OFICIAL · PNG, JPG O WEBP · MÁXIMO 2 MB</label><input id="registrationCrest" type="file" accept="image/png,image/jpeg,image/webp"></div>
+      <div class="field"><label>NOMBRE Y APELLIDO DEL JUGADOR</label><input id="registrationPlayer" maxlength="80" autocomplete="name" placeholder="Tu nombre y apellido" required></div>
+      <div class="field"><label>CLUB AL QUE REPRESENTÁS</label><input id="registrationClub" maxlength="80" placeholder="Nombre del club" required></div>
+      <div class="field"><label>ESCUDO OFICIAL · OBLIGATORIO · PNG, JPG O WEBP · MÁXIMO 2 MB</label><input id="registrationCrest" type="file" accept="image/png,image/jpeg,image/webp" required></div>
       <div id="crestPreview" class="registration-preview hidden"><img id="crestPreviewImage" alt="Vista previa del escudo"><div><strong id="crestPreviewName"></strong><p class="muted" style="font-size:10px">Vista previa del escudo seleccionado</p></div></div>
       <button class="action" id="registrationSubmit" onclick="submitRegistration()">ENVIAR POSTULACIÓN</button>
       <p id="registrationMessage" class="notice hidden" role="status"></p>
