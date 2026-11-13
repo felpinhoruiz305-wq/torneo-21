@@ -341,7 +341,7 @@ footer,footer div,footer strong{color:#FFFFFF}
       <div class="panel"><div class="group-title"><h3>GRUPO A</h3></div><div id="tableA"></div></div>
       <div class="panel"><div class="group-title"><h3>GRUPO B</h3></div><div id="tableB"></div></div>
     </div>
-    <p class="muted">Victoria: 3 puntos · Derrota: 0 puntos · Desempate: diferencia de puntos.</p>
+    <p class="muted">Victoria: 3 puntos · Bonus por ganar por 10 o más: +1 · Derrota: 0 puntos · Bonus por perder por 5 o menos: +1. Desempates: DIF, PF y enfrentamiento directo.</p>
   </div>
 </section>
 
@@ -384,7 +384,8 @@ footer,footer div,footer strong{color:#FFFFFF}
       <h3>01. FORMATO</h3>
       <div class="rule"><p>Ocho jugadores divididos en dos grupos de cuatro. Todos juegan contra todos dentro de su grupo. Cada jugador disputa tres partidos.</p></div>
       <div class="rule"><p>Clasifican los dos mejores de cada grupo. Semifinales: primero A contra segundo B y primero B contra segundo A. Los ganadores disputan la final.</p></div>
-      <div class="rule"><p>La victoria otorga 3 puntos y la derrota 0. El desempate definido es la diferencia de puntos.</p></div>
+      <div class="rule"><p><strong>Tabla de clasificación:</strong> la victoria otorga 3 puntos. El ganador suma 1 punto bonus adicional si vence por una diferencia de 10 puntos o más. La derrota otorga 0 puntos; el perdedor suma 1 punto bonus si pierde por una diferencia de 5 puntos o menos.</p></div>
+      <div class="rule"><p><strong>Criterios de desempate, en este orden:</strong> 1) diferencia de puntos (PF menos PC); 2) mayor cantidad de puntos a favor (PF); 3) enfrentamiento directo. Si hay empate entre tres o más jugadores, se consideran las victorias en los enfrentamientos entre los jugadores igualados.</p></div>
     </div>
     <div class="panel">
       <h3>02. PUNTUACIÓN</h3>
@@ -661,47 +662,73 @@ function renderFixture(id,group) {
    POSICIONES
    ===================================================== */
 
+function compareBaseStandings(a,b) {
+  return b.tournamentPoints-a.tournamentPoints ||
+    b.difference-a.difference ||
+    b.pointsFor-a.pointsFor;
+}
+
+function headToHeadWins(playerId,tiedPlayers,group) {
+  const tiedIds=new Set(tiedPlayers.map(p=>p.id));
+  return groupMatches(group).filter(m=>
+    m.status==="played" && tiedIds.has(m.player1_id) && tiedIds.has(m.player2_id)
+  ).reduce((wins,m)=>{
+    const winner=Number(m.score1)>Number(m.score2)?m.player1_id:m.player2_id;
+    return wins+(winner===playerId?1:0);
+  },0);
+}
+
 function calculateStandings(group) {
   const list=groupPlayers(group).map(p=>({
     ...p,played:0,wins:0,losses:0,pointsFor:0,pointsAgainst:0,difference:0,tournamentPoints:0
   }));
-
   const byId=Object.fromEntries(list.map(p=>[p.id,p]));
-
   groupMatches(group).filter(m=>m.status==="played").forEach(m=>{
     const p1=byId[m.player1_id];
     const p2=byId[m.player2_id];
     if(!p1 || !p2) return;
-
     const s1=Number(m.score1);
     const s2=Number(m.score2);
-
+    const margin=Math.abs(s1-s2);
     p1.played++;
     p2.played++;
     p1.pointsFor+=s1;
     p1.pointsAgainst+=s2;
     p2.pointsFor+=s2;
     p2.pointsAgainst+=s1;
-
     if(s1>s2) {
       p1.wins++;
       p2.losses++;
       p1.tournamentPoints+=3;
+      if(margin>=10) p1.tournamentPoints+=1;
+      else if(margin<=5) p2.tournamentPoints+=1;
     } else if(s2>s1) {
       p2.wins++;
       p1.losses++;
       p2.tournamentPoints+=3;
+      if(margin>=10) p2.tournamentPoints+=1;
+      else if(margin<=5) p1.tournamentPoints+=1;
     }
   });
-
   list.forEach(p=>p.difference=p.pointsFor-p.pointsAgainst);
-
-  return list.sort((a,b)=>
-    b.tournamentPoints-a.tournamentPoints ||
-    b.difference-a.difference
-  );
+  return list.sort((a,b)=>{
+    const baseOrder=compareBaseStandings(a,b);
+    if(baseOrder!==0) return baseOrder;
+    const tiedPlayers=list.filter(p=>compareBaseStandings(p,a)===0);
+    return headToHeadWins(b.id,tiedPlayers,group)-headToHeadWins(a.id,tiedPlayers,group);
+  });
 }
 
+function hasUnresolvedQualificationTie(group) {
+  const standings=calculateStandings(group);
+  return [0,1].some(index=>{
+    const a=standings[index];
+    const b=standings[index+1];
+    if(!a || !b || compareBaseStandings(a,b)!==0) return false;
+    const tiedPlayers=standings.filter(p=>compareBaseStandings(p,a)===0);
+    return headToHeadWins(a.id,tiedPlayers,group)===headToHeadWins(b.id,tiedPlayers,group);
+  });
+}
 function renderTable(id,group) {
   const list=calculateStandings(group);
   const target=document.getElementById(id);
@@ -715,7 +742,7 @@ function renderTable(id,group) {
     <div class="table-wrap">
     <table>
       <thead><tr>
-        <th>#</th><th>CLUB / JUGADOR</th><th>PJ</th><th>PG</th><th>PP</th><th>DIF</th><th>PTS</th>
+        <th>#</th><th>CLUB / JUGADOR</th><th>PJ</th><th>PG</th><th>PP</th><th>PF</th><th>PC</th><th>DIF</th><th>PTS</th>
       </tr></thead>
       <tbody>
         ${list.map((p,i)=>`
@@ -725,6 +752,8 @@ function renderTable(id,group) {
             <td>${p.played}</td>
             <td>${p.wins}</td>
             <td>${p.losses}</td>
+            <td>${p.pointsFor}</td>
+            <td>${p.pointsAgainst}</td>
             <td>${p.difference>0?"+":""}${p.difference}</td>
             <td><strong>${p.tournamentPoints}</strong></td>
           </tr>
@@ -1281,11 +1310,11 @@ async function generatePlayoffs() {
 
   if(a.length!==4 || b.length!==4) return alert("No se encontraron los ocho jugadores.");
 
-  if(a[0].tournamentPoints===a[1].tournamentPoints && a[0].difference===a[1].difference) {
-    return alert("Hay empate total en el Grupo A. La organización debe resolverlo antes de generar playoffs.");
+  if(hasUnresolvedQualificationTie("A")) {
+    return alert("Hay un empate sin resolver en los puestos de clasificación del Grupo A. Revisá los criterios de desempate antes de generar las semifinales.");
   }
-  if(b[0].tournamentPoints===b[1].tournamentPoints && b[0].difference===b[1].difference) {
-    return alert("Hay empate total en el Grupo B. La organización debe resolverlo antes de generar playoffs.");
+  if(hasUnresolvedQualificationTie("B")) {
+    return alert("Hay un empate sin resolver en los puestos de clasificación del Grupo B. Revisá los criterios de desempate antes de generar las semifinales.");
   }
 
   const rows=[
