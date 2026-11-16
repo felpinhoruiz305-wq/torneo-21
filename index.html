@@ -260,12 +260,24 @@ footer,footer div,footer strong{color:#FFFFFF}
 /* CONTRASTE DEL TEXTO EN EL BLOQUE FINAL */
 #inicio .dark-section>p{color:#FFFFFF!important}
 
+
+/* LOGO OFICIAL TORNEO 21 */
+.logo{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:58px;height:58px;text-decoration:none;line-height:0}
+.logo img{display:block;width:100%;height:100%;object-fit:contain}
+.footer-brand{display:flex;align-items:center;gap:14px}
+.footer-brand img{width:54px;height:54px;object-fit:contain;display:block}
+.footer-brand span{font-size:10px;letter-spacing:1px}
+@media(max-width:800px){
+  .logo{width:52px;height:52px}
+  .footer-brand img{width:48px;height:48px}
+}
+
 </style>
 </head>
 
 <body>
 <header>
-  <div class="logo">BARILOCHE<span>21</span></div>
+  <a class="logo" href="#" onclick="showPage('inicio',document.querySelector('#nav button'));return false" aria-label="TORNEO 21 - Inicio"><img src="./image%20(10).png" alt="Logo TORNEO 21 Bariloche"></a>
   <nav id="nav">
     <button class="active" onclick="showPage('inicio',this)">Inicio</button>
     <button onclick="showPage('fixture',this)">Fixture</button>
@@ -504,7 +516,7 @@ footer,footer div,footer strong{color:#FFFFFF}
 </main>
 
 <footer>
-  <div><strong>TORNEO 21</strong> · VERANO 2026/27</div>
+  <div class="footer-brand"><img src="./image%20(10).png" alt="Logo TORNEO 21"><span><strong>TORNEO 21</strong> · BARILOCHE 2026</span></div>
 </footer>
 
 <script>
