@@ -261,23 +261,26 @@ footer,footer div,footer strong{color:#FFFFFF}
 #inicio .dark-section>p{color:#FFFFFF!important}
 
 
-/* LOGO OFICIAL TORNEO 21 */
-.logo{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:58px;height:58px;text-decoration:none;line-height:0}
-.logo img{display:block;width:100%;height:100%;object-fit:contain}
+/* IDENTIDAD DE MARCA: LOGO + BARILOCHE 21 */
+.brand-lockup{display:flex;align-items:center;gap:12px;flex:0 0 auto;text-decoration:none;color:#F5F1E8;line-height:1}
+.brand-lockup>img{display:block;width:56px;height:56px;object-fit:contain}
+.brand-wordmark{font-size:clamp(17px,2vw,23px);font-weight:900;letter-spacing:1.2px;white-space:nowrap;color:#F5F1E8}
+.brand-wordmark span{color:#FF8126;margin-left:3px}
 .footer-brand{display:flex;align-items:center;gap:14px}
 .footer-brand img{width:54px;height:54px;object-fit:contain;display:block}
 .footer-brand span{font-size:10px;letter-spacing:1px}
 @media(max-width:800px){
-  .logo{width:52px;height:52px}
+  .brand-lockup{gap:9px}
+  .brand-lockup>img{width:48px;height:48px}
+  .brand-wordmark{font-size:18px}
   .footer-brand img{width:48px;height:48px}
 }
-
 </style>
 </head>
 
 <body>
 <header>
-  <a class="logo" href="#" onclick="showPage('inicio',document.querySelector('#nav button'));return false" aria-label="TORNEO 21 - Inicio"><img src="./image%20(10).png" alt="Logo TORNEO 21 Bariloche"></a>
+  <a class="brand-lockup" href="#" onclick="showPage('inicio',document.querySelector('#nav button'));return false" aria-label="TORNEO 21 - Inicio"><img src="./image%20(10).png" alt="Logo TORNEO 21 Bariloche"><span class="brand-wordmark">BARILOCHE<span>21</span></span></a>
   <nav id="nav">
     <button class="active" onclick="showPage('inicio',this)">Inicio</button>
     <button onclick="showPage('fixture',this)">Fixture</button>
